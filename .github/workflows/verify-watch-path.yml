@@ -1,0 +1,33 @@
+name: Verify --watch-path on Linux
+
+# Supporting evidence for https://github.com/nodejs/node/issues/66743:
+# checks that `node --watch-path` works on Linux with released Node.js versions.
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Node.js ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+        node: ['22', '24', 'current']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Show environment
+        run: |
+          node --version
+          uname -a
+      - name: Run --watch-path check
+        run: node verify-watch-path.mjs
